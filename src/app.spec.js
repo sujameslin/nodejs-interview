@@ -32,8 +32,8 @@ describe('App', () => {
 		    request(TestApplication.app)
 		      .get('/users')
 		      .expect(200)
-					.then(response => {
-						const users = response.body;
+					.then(({ body }) => {
+						const users = body.data;
 
 						expect(Array.isArray(users)).to.be.eq(true);
 						expect(users[0].name).to.be.eq('James Lin');
@@ -43,18 +43,46 @@ describe('App', () => {
 					.catch(done);
 		  });
 
-			it('reponds with paginated result', done => {
-				request(TestApplication.app)
-					.get('/users?limit=2')
-					.expect(200)
-					.then(({ body }) => {
-						expect(Array.isArray(body)).to.be.eq(true);
-						expect(body.length).to.be.eq(2);
-						done();
-					})
-					.catch(done);
+			describe('pagination query', () => {
+				it('reponds with limited result', done => {
+					request(TestApplication.app)
+						.get('/users?limit=2')
+						.expect(200)
+						.then(({ body }) => {
+							const users = body.data;
+
+							expect(users.length).to.be.eq(2);
+							expect(body.total >= body.limit).to.be.eq(true);
+							done();
+						})
+						.catch(done);
+				});
+
+				it('responds 3 users when not given', done => {
+					request(TestApplication.app)
+						.get('/users')
+						.expect(200)
+						.then(({ body }) => {
+							expect(body.limit).to.be.eq(3);
+							expect(body.skip).to.be.eq(0);
+							done();
+						})
+						.catch(done);
+				});
+
+				it('accepts skip param', done => {
+					request(TestApplication.app)
+						.get('/users?skip=1')
+						.expect(200)
+						.then(({ body }) => {
+							expect(body.skip).to.be.eq(1);
+							done();
+						})
+						.catch(done);
+				});
 			});
 		});
+
 		describe('create api', () => {
 			it('responds to requests', done => {
 		    request(TestApplication.app)

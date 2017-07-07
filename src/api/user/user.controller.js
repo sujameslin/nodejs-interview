@@ -5,14 +5,19 @@ class UserController {
   static async getList (req, res) {
     // TODO: TDD me & Refactor me
 		const pagination = {
-			limit: Math.abs(req.param('limit')) || 3,
-			skip: Math.abs(req.param('skip')) || 0
+			limit: Math.abs(req.query.limit) || 3,
+			skip: Math.abs(req.query.skip) || 0
 		};
+		const query = {};
 
 		try {
-			let users = await UserModel.find({}, null, pagination);
+			let users = await UserModel.find(query, null, pagination);
+			let total = await UserModel.count(query);
 
-			res.json(users);
+			res.json(Object.assign(pagination, {
+				total,
+				data: users
+			}));
 		} catch (e) {
 			console.error(e.message);
 		}
