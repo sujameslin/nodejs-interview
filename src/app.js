@@ -39,6 +39,10 @@ class App {
     return defer.promise;
   }
 
+	stop () {
+		return Mongoose.connection.close();
+	}
+
   initExpress () {
     this.app.use(compression());
     this.app.use(bodyParser.json({limit: '5mb'}));

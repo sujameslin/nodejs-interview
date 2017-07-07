@@ -2,21 +2,40 @@ const UserModel = require('./user.model');
 
 class UserController {
 
-  static getList (req, res) {
+  static async getList (req, res) {
     // TODO: TDD me & Refactor me
-    UserModel
-      .find({}, (err, users) => {
-        if (err) {
-          return console.error(err);
-        }
-        res.json(users)
-      })
+		const pagination = {
+			limit: Math.abs(req.param('limit')) || 3,
+			skip: Math.abs(req.param('skip')) || 0
+		};
+
+		try {
+			let users = await UserModel.find({}, null, pagination);
+
+			res.json(users);
+		} catch (e) {
+			console.error(e.message);
+		}
   }
 
-  static create (req, res) {
+  static async create (req, res) {
     // TODO: Write implementation here
-  }
 
+		const user = new UserModel(req.body);
+		const validateError = user.validateSync();
+
+		if (validateError) {
+			return res.status(422).send(validateError.message);
+		}
+
+		try {
+			await user.save();
+			res.sendStatus(201);
+		} catch (e) {
+			console.log(e.message);
+			res.send(400).send(e.message);
+		}
+  }
 }
 
 module.exports = UserController;

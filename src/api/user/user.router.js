@@ -3,7 +3,7 @@ const controller = require('./user.controller.js');
 const asyncWrapper = require('../../asyncWrapper.helper');
 const router = Express.Router();
 
-router.get('/', controller.getList);
-router.post('/', controller.create);
+router.get('/', asyncWrapper(controller.getList));
+router.post('/', asyncWrapper(controller.create));
 
 module.exports = router;
